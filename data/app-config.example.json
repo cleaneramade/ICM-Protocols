@@ -1,0 +1,9 @@
+{
+  "//": "Copy this file to app-config.json and point it at your machine. app-config.json is gitignored — your paths never leave this computer. Every field is optional: plutusRoot defaults to ~/Plutus, claudeDir to ~/.claude, scanRoots to <plutusRoot>/My Projects. Env vars ICM_PLUTUS_ROOT / ICM_CLAUDE_DIR / ICM_SCAN_ROOTS (semicolon-separated) win over this file.",
+  "plutusRoot": "C:\\Users\\you\\Documents\\Plutus",
+  "claudeDir": "C:\\Users\\you\\.claude",
+  "scanRoots": [
+    "C:\\Users\\you\\Documents\\Plutus\\My Projects",
+    "C:\\Users\\you\\Documents\\Projects"
+  ]
+}

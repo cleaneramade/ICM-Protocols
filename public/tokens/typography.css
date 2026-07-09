@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Cleanera Made — Typography
+   --------------------------------------------------------------------------
+   Bricolage Grotesque for expressive display + headings (optical-size axis),
+   Inter for UI + body, Geist Mono for code + numeric tickers. Tabular nums on
+   every numeric value in a list, ledger, KPI, or progress indicator.
+   ========================================================================== */
+
+:root {
+  --font-sans:    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-mono:    "Geist Mono", ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* Weights */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+  --weight-black:   800;
+
+  /* Tracking */
+  --tracking-tight:  -0.035em;   /* display */
+  --tracking-snug:   -0.02em;    /* headings */
+  --tracking-normal: 0;
+  --tracking-wide:    0.08em;    /* uppercase section labels */
+
+  /* Leading */
+  --leading-tight:  1.02;
+  --leading-snug:   1.18;
+  --leading-normal: 1.50;
+}
+
+/* ── Type ramp — semantic helper classes ─────────────────────────────────── */
+.cm-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-variation-settings: "opsz" 96;
+  color: var(--fg-1);
+}
+.cm-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 60;
+  color: var(--fg-1);
+}
+.cm-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 28;
+  color: var(--fg-1);
+}
+.cm-h3 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--fg-1);
+}
+.cm-h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--fg-1);
+}
+.cm-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: var(--leading-normal);
+  color: var(--fg-2);
+}
+.cm-body-sm {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--fg-3);
+}
+.cm-caption {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--fg-3);
+}
+.cm-section-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.cm-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--fg-2);
+}
+.cm-numeric {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}

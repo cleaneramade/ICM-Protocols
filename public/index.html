@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#131316" />
+  <title>ICM Protocols</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/app.css" />
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
+</head>
+<body>
+  <div class="cm-page-glow"></div>
+
+  <aside id="sidebar" class="cm-glass-surface sidebar">
+    <div class="sidebar-brand">
+      <img src="/assets/logo.svg" alt="" width="26" height="26" />
+      <div class="brand-text">
+        <span class="cm-h3">ICM Protocols</span>
+        <span class="cm-caption">Plutus OS Control</span>
+      </div>
+    </div>
+    <nav id="nav" class="sidebar-nav" aria-label="Sections"></nav>
+  </aside>
+
+  <nav id="bottomnav" class="cm-floating-pill bottomnav" aria-label="Sections"></nav>
+
+  <main id="main" class="main">
+    <header class="view-head">
+      <div class="view-head-text">
+        <h1 id="view-title" class="view-title">Rules</h1>
+        <p id="view-sub" class="view-sub"></p>
+      </div>
+      <div id="view-actions" class="view-actions"></div>
+    </header>
+    <section id="view" class="view-body"></section>
+  </main>
+
+  <div id="dirtybar" class="dirtybar cm-floating-pill" hidden>
+    <span class="cm-h4" id="dirty-note">Unsaved changes</span>
+    <button id="dirty-discard" class="btn btn-ghost" type="button">Discard</button>
+    <button id="dirty-save" class="btn btn-primary" type="button">Save changes</button>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <div id="overlay" class="overlay" hidden></div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

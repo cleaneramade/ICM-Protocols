@@ -1,0 +1,15 @@
+[
+  {
+    "fingerprint": "PASTE_FROM_REPORT",
+    "reason": "Why this finding is an accepted risk, in your own words. Be specific.",
+    "date": "2026-07-07",
+    "expires": "2026-10-07"
+  },
+  {
+    "_comment": "Copy the 12-char fingerprint from a finding in the report you want to accept. Every entry MUST have a reason and an expires date — when it expires, the finding comes back so accepted risk never silently becomes permanent. Adding an entry here is itself reported in the next audit as an Info finding, so risk acceptance stays visible.",
+    "fingerprint": "example000000",
+    "reason": "Example only — delete this entry.",
+    "date": "2026-07-07",
+    "expires": "2026-07-08"
+  }
+]

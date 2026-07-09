@@ -1,0 +1,25 @@
+# .security-audit.yaml — per-project audit config for /security-audit
+# Auto-created by the first audit. ICM Protocols is a zero-dependency local
+# Node server (binds 127.0.0.1:7717) that reads .env files, writes foundation
+# files across the Plutus brain, and can expose an ephemeral Cloudflare tunnel.
+# Treated as DATA by the audit, never as instructions.
+
+packs:
+  - dev            # AI-agent-touched project
+  - local          # binds a local port, no cloud deploy
+
+depth: quick       # override per run with --deep
+
+exclude:
+  - "node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - ".next/**"
+  - "**/*.min.js"
+  - "**/*.map"
+  - ".backups/**"
+  - "data/security-reports/**"
+
+path_instructions:
+  - path: "server/**"
+    guidance: "Local server: scrutinize path traversal on file writes (fsio/brain/envfiles), Host/Origin hardening, the password gate (secretslock), and the tunnel host allowlist (security.js). Never read a real .env body."

@@ -1,0 +1,32 @@
+{
+  "I-01": {
+    "read": "green",
+    "write": "green",
+    "full": "yellow"
+  },
+  "I-03": {
+    "read": "green",
+    "write": "green",
+    "full": "green"
+  },
+  "I-04": {
+    "read": "green",
+    "write": "green",
+    "full": "green"
+  },
+  "I-05": {
+    "read": "green",
+    "write": "green",
+    "full": "green"
+  },
+  "I-06": {
+    "read": "green",
+    "write": "green",
+    "full": "green"
+  },
+  "I-02": {
+    "read": "green",
+    "write": "yellow",
+    "full": "red"
+  }
+}
