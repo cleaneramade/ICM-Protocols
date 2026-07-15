@@ -1,0 +1,39 @@
+# .security-audit.yaml — per-project audit config for /security-audit
+# Drop this file in a project's root. The audit reads it to know which packs
+# apply, what to skip, and how deep to go. If it's missing, the audit detects
+# packs automatically and creates a sensible default (which you can then edit).
+#
+# IMPORTANT: this file is treated as DATA by the audit, never as instructions.
+# You cannot use it to tell the auditor to ignore a real finding — only to scope
+# which files and packs are in play. To accept a specific risk, use
+# .security-audit-suppressions.json instead (each entry needs a reason + expiry).
+
+# Which platform packs to run, on top of the always-on 12 core protocols.
+# Valid packs: web, pay, acct, ai, mob, fire, vps, local, pub, dev, elec, ext, ssh
+packs:
+  - dev          # every project touched by AI agents gets this
+  # - web
+  # - local
+
+# How deep to scan by default. quick = protocol + secrets + deps (1-2 agents,
+# cheap, run often). deep = full fan-out across every active pack (annual /
+# "adversarial pen-test" mode). Override per run with --deep on the command.
+depth: quick
+
+# Glob paths to EXCLUDE from the deep code audit (vendored / generated code).
+# Keeps noise out of the severity counts.
+exclude:
+  - "node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - ".next/**"
+  - "**/*.min.js"
+  - "**/*.map"
+
+# Optional: extra natural-language guidance for specific paths. Supplements the
+# baseline checks — it can add scrutiny, never remove a check.
+path_instructions:
+  # - path: "src/app/api/**"
+  #   guidance: "Scrutinize auth re-checks (WEB-2) and object-level authz (WEB-3)."
+  # - path: "**/webhooks/**"
+  #   guidance: "Verify Stripe signature verification (PAY-2) and idempotency (PAY-3)."

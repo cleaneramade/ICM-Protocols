@@ -1,0 +1,11 @@
+/* ==========================================================================
+   Cleanera Made — Fonts
+   --------------------------------------------------------------------------
+   All three families are pulled from Google Fonts (no binaries stored locally).
+   - Inter               → UI, body, headings, KPI numerics
+   - Bricolage Grotesque → expressive display face (optical-size axis 12..96)
+   - Geist Mono          → code, terminal, file paths, technical IDs
+   If you self-host, drop @font-face rules here and the compiler will ship them.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Geist+Mono:wght@400;500&display=swap");

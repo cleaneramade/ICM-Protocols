@@ -1,0 +1,40 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Personal / machine-local data — stays on this computer, never in the repo.
+# (Structure files like rule-category.json and integration-perms.json ARE
+# tracked on purpose; only owner data is excluded.)
+data/app-config.json
+data/security-reports/
+data/security-projects.json
+data/deleted-rules.json
+PLUTUS.md
+memory/
+
+# Claude Code personal overrides
+.claude/settings.local.json
+
+# Dependencies
+node_modules/
+
+# Runtime backups made by the Protocols UI server
+.backups/
+
+# Live remote-preview tunnel URL (runtime, sensitive)
+PREVIEW-URL.txt
+
+# Build output
+dist/
+build/
+.next/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+data/secrets-lock.json
+
+# Empty lockfile for a zero-dependency project — noise that also contradicts
+# the "no packages to install" positioning if it reaches the public release.
+package-lock.json

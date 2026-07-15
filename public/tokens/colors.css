@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Cleanera Made — Colors
+   --------------------------------------------------------------------------
+   Dark-first "frost-black plexi". Brand violet (#6A4DFF) is reserved for CTAs,
+   focus rings, and one or two brand moments per screen — never body text,
+   never borders, never hover chrome. All dark-mode borders are translucent
+   white. Light mode is opt-in via [data-theme="light"].
+   ========================================================================== */
+
+:root {
+  /* ── Brand violet ramp ─────────────────────────────────────────────────── */
+  --brand-300: #c4b5ff;
+  --brand-400: #a08aff;
+  --brand-500: #6a4dff;   /* primary */
+  --brand-600: #5b3eef;
+  --brand-700: #5538e0;
+  --brand-800: #4a30d4;
+  --brand-900: #3a25b8;
+  --brand-glow: 0 10px 30px -10px rgba(106, 77, 255, 0.45);
+
+  /* ── Foreground / Background (DARK DEFAULT) ────────────────────────────── */
+  color-scheme: dark;
+  --bg:   #131316;   /* page — almost-black with a hint of cool */
+  --bg-2: #0b0b0e;   /* deeper recess */
+  --fg-1: #fafafa;   /* primary text — never pure white */
+  --fg-2: #d4d4d8;   /* secondary text */
+  --fg-3: #a1a1aa;   /* muted */
+  --fg-4: #71717a;   /* placeholder / even more muted */
+
+  /* ── Surface (frosted glass) ───────────────────────────────────────────── */
+  --surface:       linear-gradient(135deg, rgba(32,32,40,0.97) 0%, rgba(28,28,36,0.95) 60%, rgba(24,24,32,0.93) 100%);
+  --surface-solid: #1e1e24;
+  --surface-2:     rgba(255,255,255,0.06);
+  --surface-3:     rgba(255,255,255,0.10);
+  --sidebar:       rgba(24,24,30,0.80);
+
+  /* ── Border / Stroke / Ring ────────────────────────────────────────────── */
+  --border:       rgba(255,255,255,0.08);
+  --border-soft:  rgba(255,255,255,0.04);
+  --glass-stroke: rgba(255,255,255,0.04);
+  --ring:         rgba(255,255,255,0.15);
+  --ring-brand:   rgba(106, 77, 255, 0.50);
+
+  /* ── Glass ─────────────────────────────────────────────────────────────── */
+  --glass-blur:        saturate(180%) blur(22px);   /* @kind other */
+  --glass-blur-strong: saturate(200%) blur(28px);   /* @kind other */
+  --glass-highlight:   rgba(255,255,255,0.05);
+
+  /* ── Semantic ──────────────────────────────────────────────────────────── */
+  --success: #34d399;  --success-soft: rgba(52,211,153,0.18);
+  --warning: #fbbf24;  --warning-soft: rgba(251,191,36,0.18);
+  --danger:  #f87171;  --danger-soft:  rgba(248,113,113,0.18);
+  --info:    #60a5fa;  --info-soft:    rgba(96,165,250,0.18);
+  --accent:  #a78bfa;  --accent-soft:  rgba(167,139,250,0.18);  /* lavender — supports brand */
+
+  /* ── Semantic → text pairings (for pills / soft chips) ─────────────────── */
+  --success-fg: #86efac;
+  --warning-fg: #fde047;
+  --danger-fg:  #fca5a5;
+  --info-fg:    #93c5fd;
+  --accent-fg:  #d8b4fe;
+
+  /* ── Icon-tile tints (background, foreground) — 8 hues, ~45° apart ─────── */
+  --tile-violet-bg:  rgba(106,77,255,0.18);  --tile-violet-fg:  #c4b5ff;
+  --tile-blue-bg:    rgba(59,130,246,0.18);  --tile-blue-fg:    #93c5fd;
+  --tile-green-bg:   rgba(34,197,94,0.20);   --tile-green-fg:   #86efac;
+  --tile-yellow-bg:  rgba(234,179,8,0.20);   --tile-yellow-fg:  #fde047;
+  --tile-orange-bg:  rgba(249,115,22,0.20);  --tile-orange-fg:  #fdba74;
+  --tile-red-bg:     rgba(220,38,38,0.22);   --tile-red-fg:     #fca5a5;
+  --tile-magenta-bg: rgba(217,70,239,0.20);  --tile-magenta-fg: #f0abfc;
+  --tile-slate-bg:   rgba(255,255,255,0.10); --tile-slate-fg:   #fafafa;
+
+  /* ── Product accent map (matches marketing site iconColor field) ───────── */
+  --product-shiply:        var(--tile-green-fg);   /* Shiply — web */
+  --product-finance-board: var(--tile-violet-fg);  /* Finance Board — mobile */
+  --product-quad-claude:   var(--tile-blue-fg);    /* Quad-Claude — desktop */
+  --product-vps-mount:     var(--tile-orange-fg);  /* VPS Mount — windows */
+}
+
+/* ── Light mode override ─────────────────────────────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg:   #f4f5f9;
+  --bg-2: #e6ecf5;
+  --fg-1: #0f172a;
+  --fg-2: #334155;
+  --fg-3: #64748b;
+  --fg-4: #94a3b8;
+
+  --surface:       linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(243,245,251,0.78) 100%);
+  --surface-solid: #ffffff;
+  --surface-2:     rgba(15,23,42,0.04);
+  --surface-3:     rgba(15,23,42,0.06);
+  --sidebar:       rgba(255,255,255,0.85);
+
+  --border:       rgba(15,23,42,0.08);
+  --border-soft:  rgba(15,23,42,0.04);
+  --glass-stroke: rgba(148,163,184,0.30);
+  --ring:         rgba(15,23,42,0.15);
+}

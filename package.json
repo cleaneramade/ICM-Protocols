@@ -1,0 +1,11 @@
+{
+  "name": "icm-protocols-ui",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Plutus Protocols UI — local control panel for the Plutus OS brain, skills, integrations, and env files.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/board.test.js tests/categories.test.js tests/fsio.test.js tests/roundtrip.test.js tests/security.test.js"
+  }
+}

@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Cleanera Made — Surface Helpers
+   --------------------------------------------------------------------------
+   Drop-in classes that match the in-product feel. Blur is the brand: sidebars,
+   popovers, modals, headers, and the bottom-nav pill all layer a tinted
+   background over backdrop-filter. Never a fully-opaque background on a
+   primary surface.
+   ========================================================================== */
+
+.cm-glass-card {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.30), var(--shadow-inset);
+  border: 0;
+  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+}
+.cm-glass-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.40), var(--shadow-inset);
+}
+
+.cm-glass-surface {
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 0 0 1px var(--glass-stroke);
+  background: var(--sidebar);
+}
+
+.cm-floating-pill {
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 32px -8px rgba(0,0,0,0.70), var(--shadow-inset);
+}
+
+/* Soft inset card (no blur) — the flatter KPI / list-row treatment */
+.cm-soft-card {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+  border-radius: var(--radius-lg);
+}
+
+/* Page glow — subtle radial brand wash, anchored at the top of a page */
+.cm-page-glow {
+  position: fixed;
+  inset: -30vh 0 auto 0;
+  height: 90vh;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(900px 480px at 50% 0%, rgba(106,77,255,0.18), transparent 60%),
+    radial-gradient(1200px 600px at 50% -200px, rgba(255,255,255,0.04), transparent 60%);
+}

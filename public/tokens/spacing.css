@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Cleanera Made — Spacing & Radii
+   --------------------------------------------------------------------------
+   4px base grid. Page padding 20–32px, card padding 16–20px, 24px between
+   major sections. Radii climb from inputs (8–12) to cards (16–20) to hero
+   sheets (20–24); pills/chips/FABs are fully round.
+   ========================================================================== */
+
+:root {
+  /* ── Spacing scale (4px base) ──────────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ── Corner radii ──────────────────────────────────────────────────────── */
+  --radius:     1rem;      /* 16px — base */
+  --radius-xs:  0.375rem;  /*  6px — chips, tiny tiles */
+  --radius-sm:  0.625rem;  /* 10px — buttons, inputs */
+  --radius-md:  0.75rem;   /* 12px — inputs, small cards */
+  --radius-lg:  1rem;      /* 16px — cards */
+  --radius-xl:  1.25rem;   /* 20px — hero cards */
+  --radius-2xl: 1.5rem;    /* 24px — modal sheets */
+  --radius-pill: 9999px;   /* pills, chips, badges, FABs */
+
+  /* ── Layout constants ──────────────────────────────────────────────────── */
+  --page-max:     1120px;  /* marketing container */
+  --app-sidebar:  248px;   /* web app rail width */
+  --nav-height:   52px;    /* floating nav pill */
+}
