@@ -1,6 +1,6 @@
-// Integration → domain map + logo source chain. Logos come from the Brandfetch
-// Logo API when a client ID is set (free, https://developers.brandfetch.com),
-// falling back to keyless sources so logos show without a key.
+// Integration → domain map + logo source chain. A connection can carry a custom
+// logo URL (a direct image link the owner pasted); otherwise logos are pulled
+// automatically from keyless sources by the connection's domain.
 export const INTEGRATION_DOMAINS = {
   'Gmail': 'gmail.com',
   'GitHub': 'github.com',
@@ -45,14 +45,18 @@ const LOGO_OVERRIDES = {
   ),
 };
 
-// Ordered list of logo URLs to try (first that loads wins).
-export function logoSources(name, clientId) {
-  if (LOGO_OVERRIDES[name]) return [LOGO_OVERRIDES[name]];
-  const domain = domainFor(name);
-  if (!domain) return [];
+// Ordered list of logo URLs to try (first that loads wins). A custom URL the
+// owner pasted wins; if it fails to load the chain falls through to the pinned
+// override (if any) and the keyless domain sources, so a bad URL never leaves a
+// connection logo-less.
+export function logoSources(name, customUrl) {
   const out = [];
-  if (clientId) out.push(`https://cdn.brandfetch.io/${domain}/w/128/h/128?c=${encodeURIComponent(clientId)}`);
-  out.push(`https://unavatar.io/${domain}?fallback=false`);
-  out.push(`https://icons.duckduckgo.com/ip3/${domain}.ico`);
+  if (customUrl) out.push(customUrl);
+  if (LOGO_OVERRIDES[name]) out.push(LOGO_OVERRIDES[name]);
+  const domain = domainFor(name);
+  if (domain) {
+    out.push(`https://unavatar.io/${domain}?fallback=false`);
+    out.push(`https://icons.duckduckgo.com/ip3/${domain}.ico`);
+  }
   return out;
 }

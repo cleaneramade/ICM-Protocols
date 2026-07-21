@@ -115,59 +115,6 @@ export function confirmDialog(title, message, confirmLabel = 'Confirm', kind = '
   });
 }
 
-/* ── Custom dropdown (styled open state — never native) ── */
-export function dropdown({ items, value, onSelect, label, width }) {
-  let open = false;
-  const wrap = el('div', { class: 'dd' });
-  const labelSpan = el('span', { class: 'dd-label', text: labelFor(value) });
-  const btn = el('button', { class: 'dd-btn', type: 'button', style: width ? `width:${width}` : null },
-    labelSpan, icon('chevron-down', { size: 14 }));
-  const panel = el('div', { class: 'dd-panel', role: 'listbox' });
-  panel.hidden = true;
-
-  function labelFor(v) {
-    const it = items.find((i) => i.value === v);
-    return it ? it.label : (label || 'Select…');
-  }
-  function render() {
-    clear(panel);
-    for (const it of items) {
-      panel.append(el('button', {
-        class: 'dd-item', type: 'button', role: 'option',
-        'aria-selected': String(it.value === value),
-        onclick: () => { value = it.value; labelSpan.textContent = it.label; toggle(false); onSelect?.(it.value, it); },
-      }, it.label, it.sub ? el('span', { class: 'dd-sub', text: it.sub }) : null));
-    }
-  }
-  function toggle(state) {
-    open = state ?? !open;
-    panel.hidden = !open;
-    if (open) render();
-  }
-  btn.onclick = () => toggle();
-  document.addEventListener('click', (e) => { if (open && !wrap.contains(e.target)) toggle(false); });
-  wrap.append(btn, panel);
-  wrap.setValue = (v) => { value = v; labelSpan.textContent = labelFor(v); };
-  wrap.setItems = (next) => { items = next; render(); };
-  return wrap;
-}
-
-/* ── Segmented control ── */
-export function segmented(options, activeValue, onChange) {
-  const wrap = el('div', { class: 'segmented', role: 'tablist' });
-  const render = (val) => {
-    clear(wrap);
-    for (const o of options) {
-      wrap.append(el('button', {
-        type: 'button', 'aria-pressed': String(o.value === val),
-        onclick: () => { render(o.value); onChange(o.value); },
-      }, o.label));
-    }
-  };
-  render(activeValue);
-  return wrap;
-}
-
 export function field(labelText, control) {
   return el('div', { class: 'field' }, el('label', { text: labelText }), control);
 }

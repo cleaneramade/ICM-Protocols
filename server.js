@@ -7,7 +7,7 @@ import { serveStatic } from './server/static.js';
 import { getBoard, saveBoard, listDeleted, restoreDeleted, purgeDeleted } from './server/board.js';
 import { logActivity, logMemoryChange } from './server/logbook.js';
 import { listUserSkills, listPluginSkills, getSkill, createSkill, updateSkill, archiveSkill, revealSkill } from './server/skills.js';
-import { listProjects, getEnv, putEnv, redactRaw, deleteProjectSecrets } from './server/envfiles.js';
+import { listProjects, getEnv, putEnv, redactRaw, deleteProjectSecrets, listCandidateFolders, linkProject } from './server/envfiles.js';
 import { lockStatus, setPassword, requirePassword } from './server/secretslock.js';
 import { brainTree, getBrainFile, putBrainFile } from './server/brain.js';
 import { listProfiles, putProfile } from './server/profiles.js';
@@ -84,6 +84,17 @@ router.add('POST', '/api/skills/:name/reveal', async (req, res, p) => sendJson(r
 
 router.add('GET', '/api/projects', async (req, res) => sendJson(res, 200, { ok: true, projects: await listProjects() }));
 
+// "Add project" support: folders under the scan roots not yet linked, and the
+// link action itself (writes only the PLUTUS.md marker; never creates folders).
+router.add('GET', '/api/projects/candidates', async (req, res) => {
+  sendJson(res, 200, { ok: true, candidates: await listCandidateFolders() });
+});
+router.add('POST', '/api/projects/link', async (req, res, p, body) => {
+  const out = await linkProject(body?.path);
+  if (!out.alreadyLinked) await logActivity('link', out.path, 'project linked via Protocols UI (Secrets)').catch(() => {});
+  sendJson(res, 200, { ok: true, ...out });
+});
+
 // Secrets reveal lock (owner password). Only the has-password flag is public.
 router.add('GET', '/api/secrets-lock', async (req, res) => sendJson(res, 200, { ok: true, ...(await lockStatus()) }));
 router.add('PUT', '/api/secrets-lock', async (req, res, p, body) => {
@@ -112,8 +123,9 @@ router.add('PUT', '/api/env', async (req, res, p, body) => {
   const out = await putEnv(body?.project, body?.file, body?.raw ?? '', body?.baseHash);
   sendJson(res, 200, { ok: true, ...out });
 });
-// Delete a project's .env secret files (backed up first). Gated by the password
-// when one is set — you can't wipe locked secrets without it.
+// Delete a project's .env secret files (NOT recoverable — secrets are never
+// copied to backups). Gated by the password when one is set — you can't wipe
+// locked secrets without it.
 router.add('DELETE', '/api/env', async (req, res, p, body) => {
   await requirePassword(body?.password);
   const out = await deleteProjectSecrets(body?.project);

@@ -37,6 +37,8 @@
       "mcp__claude_ai_Gmail__list_drafts"
     ],
     "ask": [
+      "Edit(.claude/**)",
+      "Write(.claude/**)",
       "Bash(git push)",
       "Bash(git push *)",
       "Bash(git remote add *)",

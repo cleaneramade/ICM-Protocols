@@ -159,6 +159,15 @@ async function saveIntPerms(map) {
   await backupThenAtomicWrite(PATHS.intPerms, JSON.stringify(map, null, 2) + '\n', {});
 }
 
+// Per-connection custom logo URL (a direct image link the owner pasted).
+async function loadIntLogos() {
+  try { return JSON.parse(await fs.readFile(PATHS.intLogos, 'utf8')); }
+  catch { return {}; }
+}
+async function saveIntLogos(map) {
+  await backupThenAtomicWrite(PATHS.intLogos, JSON.stringify(map, null, 2) + '\n', {});
+}
+
 // Sensible default access level for a rule from its text.
 export function inferAccess(text) {
   const t = String(text || '').toLowerCase();
@@ -214,7 +223,7 @@ export function applyEdits(fileModel, editedSections, retired) {
         const cells = row.cells.slice();
         cells[0] = id;
         addedRules.push(`${id}: ${cells[1] || ''}`);
-        outRows.push({ id, cells, raw: null, access: row.access, perms: row.perms, category: row.category, icon: row.icon });
+        outRows.push({ id, cells, raw: null, access: row.access, perms: row.perms, category: row.category, icon: row.icon, logo: row.logo });
       } else {
         const existing = fileById.get(id);
         if (!existing) throw httpError(400, 'UNKNOWN_ID', `${def.key}: row ${id} does not exist (IDs are immutable — new rows use id:null)`);
@@ -223,7 +232,7 @@ export function applyEdits(fileModel, editedSections, retired) {
         if (cells[0] !== id) throw httpError(400, 'ID_CELL', `${def.key}: first cell of ${id} must be the ID itself`);
         const unchanged = existing.cells.length === cells.length && existing.cells.every((c, i) => c === cells[i]);
         if (!unchanged) editedIds.push(id);
-        outRows.push({ id, cells, raw: unchanged ? existing.raw : null, access: row.access, perms: row.perms, category: row.category, icon: row.icon });
+        outRows.push({ id, cells, raw: unchanged ? existing.raw : null, access: row.access, perms: row.perms, category: row.category, icon: row.icon, logo: row.logo });
       }
       seen.add(id);
     }
@@ -349,6 +358,14 @@ export async function saveBoard(editedSections, baseHash, meta = {}) {
   }
   await saveIntPerms(iperms);
 
+  // Persist per-connection custom logo URLs (keyed by final id; pruned to live).
+  const ilogos = { ...(await loadIntLogos()) };
+  for (const id of Object.keys(ilogos)) if (!liveInt.has(id)) delete ilogos[id];
+  for (const row of newRowsBySection.integrations || []) {
+    if (row.logo) ilogos[row.id] = row.logo; else delete ilogos[row.id];
+  }
+  await saveIntLogos(ilogos);
+
   return { newHash, assignedIds, deletedIds, editedIds, addedRules, changed: { ...meta } };
 }
 
@@ -374,8 +391,10 @@ export async function getBoard() {
     }
   }
   const intPerms = await loadIntPerms();
+  const intLogos = await loadIntLogos();
   for (const row of sections.integrations.rows) {
     row.perms = { ...DEFAULT_INT_PERMS, ...(intPerms[row.id] || {}) };
+    if (intLogos[row.id]) row.logo = intLogos[row.id];
   }
   return { sections, baseHash: t.hash };
 }

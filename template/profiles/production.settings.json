@@ -14,7 +14,10 @@
       "mcp__claude_ai_Gmail__list_labels",
       "mcp__claude_ai_Gmail__list_drafts"
     ],
-    "ask": [],
+    "ask": [
+      "Edit(.claude/**)",
+      "Write(.claude/**)"
+    ],
     "deny": [
       "Read(*.pem)",
       "Read(id_rsa*)",

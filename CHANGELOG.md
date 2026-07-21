@@ -4,6 +4,57 @@ All notable changes to ICM Protocols. Dates are YYYY-MM-DD. This project aims
 to follow [Semantic Versioning](https://semver.org): security fixes and bug
 fixes in patch/minor releases, breaking changes in majors.
 
+## [1.2.0] — 2026-07-21
+
+A Secrets overhaul. Every key is visible, deletes can't miss, the browser's
+password manager stays out, projects with several env files show them all —
+and the server keeps itself up to date.
+
+### Added
+- **Add a project from the Secrets page.** A dashed "Add project" button lists
+  folders in your project roots that aren't linked yet. Pick one and it gets
+  its own Secrets group (just the `PLUTUS.md` marker — no secrets are ever
+  created for you). A folder that's already linked simply opens instead of
+  being added twice.
+- **File tabs.** A project with several env files gets one tab per file, each
+  with its key count, so no file (and no key) is ever hidden.
+- **Search when the list grows.** With more than 8 projects, a search box
+  appears above the Secrets list, so the page stays quick with tons of
+  projects.
+- **Tests for the secrets engine** (`tests/envfiles.test.js`) — redaction,
+  key counting, saving, linking, and path safety.
+
+### Fixed
+- **Deleting a key can never remove the wrong one.** Each delete re-finds its
+  exact line at click time instead of trusting a remembered line number, and
+  it writes only the deletion — unsaved edits to other rows stay in the
+  editor until you press Save.
+- **Every key in the file is listed.** The page used to hide keys whose names
+  didn't look secret (like `DATABASE_URL`), which could block adding a
+  "duplicate" you couldn't see. All keys now show, values masked.
+- **A project's keys can no longer hide behind an empty env file.** The page
+  opens the file with the most keys instead of a fixed favorite, so an empty
+  `.env.development` can't blank out a project whose keys live in `.env`.
+- **A cleared key name can't corrupt the file.** The row stays visible and
+  Save refuses until the key is named or deleted.
+- **Honest delete warnings.** Secret files are never copied to backups, so
+  dialogs no longer promise a restorable backup.
+
+### Changed
+- **No more "Save password?" pop-ups.** Secret values and the password dialogs
+  are masked by CSS instead of real password fields, so the browser's password
+  manager never offers to save them.
+- **Permission changes now prompt.** All three project profiles ask before any
+  edit inside a project's `.claude/` folder — permission changes happen only
+  on your request plus your confirmation.
+- **The server keeps itself current.** `npm start` runs `node --watch`, so
+  code updates restart the app automatically — the UI can never call routes
+  an old process doesn't have.
+
+### Removed
+- Dead code: two unused UI components (dropdown, segmented control) and their
+  styles, plus two orphaned CSS classes.
+
 ## [1.1.0] — 2026-07-15
 
 A reliability and security release. Every change below is backward-compatible —

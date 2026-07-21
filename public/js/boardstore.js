@@ -51,6 +51,13 @@ export function setIntMaster(row, color) {
   markDirty();
 }
 
+// A direct image URL the owner pasted for a connection's logo (empty = clear it,
+// falls back to the automatic keyless logo).
+export function setIntLogo(row, url) {
+  row.logo = url || undefined;
+  markDirty();
+}
+
 // Move a rule to another color (green/yellow/red). It re-ids on save; access travels with it.
 // The category must be resolved BEFORE the move: built-in rules carry no
 // explicit category (theirs comes from the static ID map), and the moved row
@@ -81,7 +88,7 @@ export function deleteNewRow(sectionKey, rowRef) {
 export async function saveBoard(summary) {
   const sections = {};
   for (const [key, s] of Object.entries(state.sections)) {
-    sections[key] = { rows: s.rows.map((r) => ({ id: r.id, cells: r.cells, access: r.access, perms: r.perms, category: r.category, icon: r.icon })) };
+    sections[key] = { rows: s.rows.map((r) => ({ id: r.id, cells: r.cells, access: r.access, perms: r.perms, category: r.category, icon: r.icon, logo: r.logo })) };
   }
   const res = await post('/api/board', { baseHash: state.baseHash, sections, summary });
   const added = Object.values(res.assignedIds || {}).flat();

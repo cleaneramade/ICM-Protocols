@@ -7,10 +7,9 @@ import { readFileTracked, backupThenAtomicWrite, backupThenDelete } from './fsio
 import { httpError } from './router.js';
 
 const ENV_FILE_RE = /^\.env(\.[\w.-]+)?$/;
-const KEY_LINE = /^(\s*)([A-Za-z_][\w.-]*)(\s*=)(.*)$/;
-// Keep in sync with the client's SECRET_RE (public/js/views/env.js).
-const SECRET_RE = /(KEY|SECRET|TOKEN|PASSWORD|PASSWD|PWD|CREDENTIAL|PRIVATE|BEARER|JWT|OAUTH|API|SIGN|WEBHOOK|SALT|CERT|ACCESS)/i;
-const isSecretKey = (name) => SECRET_RE.test(name);
+// Every named KEY=value line counts — the UI lists them all (values masked),
+// so the badge must match what the list shows (client: public/js/views/env.js).
+const KEY_LINE = /^\s*[A-Za-z_][\w.-]*\s*=/;
 
 // Blank every value so no real secret ever reaches the browser. Key names,
 // comments, and blank lines are preserved so the UI can still render structure.
@@ -47,22 +46,23 @@ export function redactRaw(raw) {
 // capturing it so the value after = can be dropped.
 const REDACT_KEY = /^(\s*(?:export\s+)?[A-Za-z_][\w.-]*\s*=)/;
 
-// The single .env the UI manages for a project (prefer .env, then .env.local…).
-function primaryEnvFile(files) {
-  if (files.includes('.env')) return '.env';
-  if (files.includes('.env.local')) return '.env.local';
-  return files.find((f) => f !== '.env.example') || files[0] || null;
+// Count the keys in one env file. Reads the file (allowed) but returns only
+// a number — never any value.
+async function countKeysIn(dir, file) {
+  try {
+    const raw = await fs.readFile(path.join(dir, file), 'utf8');
+    return raw.split('\n').filter((l) => KEY_LINE.test(l)).length;
+  } catch { return 0; }
 }
 
-// Count secret/API keys in a project's primary file. Reads the file (allowed)
-// but returns only a number — never any value.
-async function countSecretKeys(dir, files) {
-  const f = primaryEnvFile(files);
-  if (!f) return 0;
-  try {
-    const raw = await fs.readFile(path.join(dir, f), 'utf8');
-    return raw.split('\n').filter((l) => { const m = /^\s*([A-Za-z_][\w.-]*)\s*=/.exec(l); return m && isSecretKey(m[1]); }).length;
-  } catch { return 0; }
+// The file the UI opens first: the one with the MOST keys. A recovered or
+// stub .env.development with zero keys must never hide a full .env next to
+// it. Ties break on the conventional order (.env, .env.local, then the rest;
+// .env.example last — it's a names-only template).
+function pickPrimary(files, counts) {
+  const rank = (f) => (f === '.env' ? 0 : f === '.env.local' ? 1 : f === '.env.example' ? 3 : 2);
+  const sorted = [...files].sort((a, b) => (counts[b] || 0) - (counts[a] || 0) || rank(a) - rank(b));
+  return sorted[0] || null;
 }
 
 export async function listProjects() {
@@ -82,10 +82,67 @@ export async function listProjects() {
       try {
         files = (await fs.readdir(dir)).filter((f) => ENV_FILE_RE.test(f)).sort();
       } catch { /* ignore */ }
-      projects.push({ name: e.name, path: dir, envFiles: files, keyCount: await countSecretKeys(dir, files) });
+      const keyCounts = {};
+      for (const f of files) keyCounts[f] = await countKeysIn(dir, f);
+      const primary = pickPrimary(files, keyCounts);
+      projects.push({ name: e.name, path: dir, envFiles: files, keyCounts, primary, keyCount: primary ? keyCounts[primary] : 0 });
     }
   }
   return projects.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Folders sitting directly under a scan root that are NOT yet Plutus projects —
+// the candidates for "Add project" in the Secrets view. Dot-folders and the
+// Plutus OS root itself are never offered.
+export async function listCandidateFolders() {
+  const plutusReal = await fs.realpath(PATHS.plutusRoot).catch(() => path.resolve(PATHS.plutusRoot));
+  const seen = new Set();
+  const out = [];
+  for (const root of PATHS.scanRoots) {
+    let entries = [];
+    try { entries = await fs.readdir(root, { withFileTypes: true }); } catch { continue; }
+    for (const e of entries) {
+      if (!e.isDirectory() || e.name.startsWith('.')) continue;
+      const dir = path.join(root, e.name);
+      if (seen.has(dir)) continue;
+      seen.add(dir);
+      const real = await fs.realpath(dir).catch(() => dir);
+      if (real === plutusReal) continue;
+      const hasPlutus = await fs.access(path.join(dir, 'PLUTUS.md')).then(() => true).catch(() => false);
+      if (!hasPlutus) out.push({ name: e.name, path: dir });
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Link an existing folder as a Plutus project by writing the PLUTUS.md marker.
+// If the marker is already there, nothing is written — the caller just routes
+// to the existing group. Never creates folders; the folder must already exist
+// directly under a scan root (same depth-1 rule the scanner uses).
+export async function linkProject(projectPath) {
+  if (!projectPath || !String(projectPath).trim()) throw httpError(400, 'BAD_PROJECT', 'No folder specified');
+  let norm;
+  try { norm = await fs.realpath(path.resolve(projectPath)); }
+  catch { throw httpError(400, 'BAD_PROJECT', 'That folder doesn’t exist'); }
+  const roots = await Promise.all(PATHS.scanRoots.map((r) => fs.realpath(r).catch(() => path.resolve(r))));
+  if (!roots.includes(path.dirname(norm))) throw httpError(400, 'BAD_PROJECT', 'The folder must sit directly inside a scan root');
+  const plutusReal = await fs.realpath(PATHS.plutusRoot).catch(() => path.resolve(PATHS.plutusRoot));
+  if (norm === plutusReal) throw httpError(400, 'BAD_PROJECT', 'The Plutus OS folder itself can’t be a project');
+  const marker = path.join(norm, 'PLUTUS.md');
+  if (await fs.access(marker).then(() => true).catch(() => false)) {
+    return { path: norm, name: path.basename(norm), alreadyLinked: true };
+  }
+  const stub = [
+    '# Plutus OS — linked project',
+    '',
+    'This folder was linked to the ICM protocols from the Protocols UI so its',
+    'secrets can be managed there. Run `/plutus` in this project to complete the',
+    'full foundation setup (rules, profiles, design system). This file is',
+    'regenerated by `/plutus` — don’t hand-edit.',
+    '',
+  ].join('\n');
+  await backupThenAtomicWrite(marker, stub, {});
+  return { path: norm, name: path.basename(norm), alreadyLinked: false };
 }
 
 // Validate a project path is a real Plutus project inside our scan roots.
@@ -111,7 +168,8 @@ async function resolveEnvPath(projectPath, file) {
   return path.join(await resolveProjectDir(projectPath), file);
 }
 
-// Delete a project's real .env secret files (backed up first, so recoverable).
+// Delete a project's real .env secret files. Secret files are never copied to
+// .backups (fsio no-plaintext-at-rest rule), so this is NOT recoverable.
 // .env.example is a non-secret template and is intentionally left in place.
 export async function deleteProjectSecrets(projectPath) {
   const dir = await resolveProjectDir(projectPath);

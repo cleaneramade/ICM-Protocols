@@ -9,7 +9,7 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 /* No blue tap flash on mobile for anything clickable, including overlays */
 a, button, [role="button"], [onclick], .nav-item, .cat-head, .bucket-row, .tree-item,
-.dd-item, .perm-tgl-btn, .icon-btn, .segmented button, input, textarea, select, label {
+.perm-tgl-btn, .icon-btn, input, textarea, select, label {
   -webkit-tap-highlight-color: transparent;
 }
 [hidden] { display: none !important; }
@@ -179,43 +179,6 @@ body {
 .icon-choice[data-selected="true"][data-color="green"] { background: var(--success-soft); color: var(--success-fg); box-shadow: inset 0 0 0 1.5px var(--success-fg); }
 .icon-choice[data-selected="true"][data-color="yellow"] { background: var(--warning-soft); color: var(--warning-fg); box-shadow: inset 0 0 0 1.5px var(--warning-fg); }
 .icon-choice[data-selected="true"][data-color="red"] { background: var(--danger-soft); color: var(--danger-fg); box-shadow: inset 0 0 0 1.5px var(--danger-fg); }
-
-/* ── Segmented control ──────────────────────────────────────────────────── */
-.segmented {
-  display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--radius-pill);
-  background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border-soft);
-}
-.segmented button {
-  border: 0; background: transparent; color: var(--fg-3);
-  font: inherit; font-size: 12.5px; font-weight: 600;
-  padding: 7px 14px; border-radius: var(--radius-pill); cursor: pointer;
-}
-.segmented button[aria-pressed="true"] { background: var(--surface-3); color: var(--fg-1); box-shadow: inset 0 0 0 1px var(--border-soft); }
-
-/* ── Custom dropdown (rule 28: styled open state, never native) ─────────── */
-.dd { position: relative; display: inline-block; }
-.dd-btn {
-  display: inline-flex; align-items: center; gap: var(--space-2);
-  padding: 9px 12px; border-radius: var(--radius-sm); cursor: pointer;
-  background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border);
-  color: var(--fg-1); border: 0; font: inherit; font-size: 13px; max-width: 320px;
-}
-.dd-btn .dd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dd-panel {
-  position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%;
-  background: var(--surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-  border-radius: var(--radius-md); box-shadow: 0 12px 36px rgba(0,0,0,0.5), inset 0 0 0 1px var(--glass-stroke);
-  padding: 6px; z-index: 60; max-height: 320px; overflow-y: auto; scrollbar-width: none;
-}
-.dd-panel::-webkit-scrollbar { display: none; }
-.dd-item {
-  display: flex; align-items: center; gap: var(--space-2); width: 100%;
-  padding: 9px 10px; border-radius: var(--radius-xs); cursor: pointer;
-  border: 0; background: transparent; color: var(--fg-2); font: inherit; font-size: 13px; text-align: left;
-}
-.dd-item:hover { background: var(--surface-2); color: var(--fg-1); }
-.dd-item[aria-selected="true"] { color: var(--fg-1); background: var(--surface-2); }
-.dd-item .dd-sub { color: var(--fg-4); font-size: 11px; margin-left: auto; font-family: var(--font-mono); }
 
 /* ── Category accordion (Rules + Permissions) ───────────────────────────── */
 .cat-list { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -605,6 +568,12 @@ body {
 /* Header legend — same tile style as the body legend, no descriptions */
 .head-legend { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
 .legend-label { color: var(--fg-1); font-size: 13px; font-weight: 700; }
+/* Connections header: the dashed Add button (.inline-add) sits left of the
+   legend — re-centered for the header row (like .cat-add) with a trailing gap. */
+.conn-add-btn { align-self: center; margin-top: 0; padding: 6px 11px; margin-inline-end: var(--space-3); }
+/* Open connection card: the Change-logo + Remove buttons sit in a row. */
+.conn-card-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-3); }
+.conn-card-actions .inline-add { margin-top: 0; }
 
 /* ── Toasts ─────────────────────────────────────────────────────────────── */
 .toasts { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: var(--space-2); z-index: 90; max-width: min(380px, calc(100vw - 40px)); }
@@ -626,10 +595,12 @@ body {
 
 /* ── Env (Secrets): accordion card editor ───────────────────────────────── */
 .env-row { display: grid; grid-template-columns: minmax(150px, 40%) 1fr auto; gap: var(--space-3); align-items: center; padding: 6px 0; }
-.env-key { font-family: var(--font-mono); font-size: 12px; color: var(--fg-2); overflow-wrap: anywhere; }
 .env-key-input { font-weight: 600; color: var(--fg-1); }
 .env-val { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.env-banner { display: flex; gap: var(--space-2); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); color: var(--fg-3); font-size: 12px; }
+/* Masked like a password field, but a plain TEXT input as far as the browser
+   is concerned — Chrome's password manager never sees a credential here, so
+   the "Save password?" bubble can never appear for secret values. */
+.env-masked { -webkit-text-security: disc; }
 .env-proj-loc { font-family: var(--font-mono); font-size: 11px; color: var(--fg-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 5px; }
 /* Key-counter badge on the right of a collapsed project card */
 .env-count { display: inline-flex; align-items: baseline; gap: 3px; flex: 0 0 auto; padding: 5px 11px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--fg-3); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -641,6 +612,32 @@ body {
 .env-check[data-on="true"] { color: var(--brand-500); }
 .env-select-card { transition: box-shadow var(--dur-fast) ease; }
 .env-select-card[data-selected="true"] { box-shadow: inset 0 0 0 1px var(--ring-brand); }
+/* File tabs inside a card when a project has several env files */
+.env-file-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-3); }
+.env-chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px;
+  border-radius: var(--radius-pill); border: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600;
+  background: var(--surface-2); color: var(--fg-3);
+}
+.env-chip:hover { background: var(--surface-3); color: var(--fg-1); }
+.env-chip[data-on="true"] { background: var(--surface-3); color: var(--fg-1); box-shadow: inset 0 0 0 1px var(--ring); }
+.env-chip-n { font-variant-numeric: tabular-nums; color: var(--fg-4); font-size: 11px; }
+.env-chip[data-on="true"] .env-chip-n { color: var(--fg-2); }
+/* Secrets header: the dashed Add button matches the ghost buttons' height */
+.env-add-btn { align-self: center; margin-top: 0; padding: 9px 14px; font-size: 13px; }
+/* "Add a project" dialog: candidate folder rows (scrollbar hidden, rule 27) */
+.env-cand-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; scrollbar-width: none; }
+.env-cand-list::-webkit-scrollbar { display: none; }
+.env-cand {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%;
+  padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 0; background: var(--surface-2); color: var(--fg-2); font: inherit; text-align: left;
+}
+.env-cand:hover { background: var(--surface-3); color: var(--fg-1); }
+.env-cand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.env-cand-name { font-weight: 600; color: var(--fg-1); font-size: 13px; }
+.env-cand-path { font-family: var(--font-mono); font-size: 11px; color: var(--fg-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.env-cand-empty { padding: 10px 4px; }
 .env-row input[readonly] { opacity: 0.8; cursor: default; }
 /* Value input with a lock/unlock icon on the right (centered) */
 .env-val-wrap { position: relative; display: block; min-width: 0; }
@@ -661,6 +658,9 @@ body {
   transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
 }
 .env-discard:hover { background: var(--danger-soft); color: var(--danger-fg); }
+/* Two-stage delete on a saved key row: armed (x → minus) holds the danger tint
+   until it either deletes on the second press or auto-disarms. */
+.env-del[data-armed="true"] { background: var(--danger-soft); color: var(--danger-fg); }
 /* Never a purple/brand focus ring on any text input — keep it neutral */
 .input:focus, .textarea:focus, input:focus, textarea:focus { outline: none; box-shadow: inset 0 0 0 1px var(--ring); }
 .env-editor { padding-top: var(--space-1); }

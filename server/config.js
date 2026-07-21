@@ -52,6 +52,7 @@ export const PATHS = {
   ruleIcon: path.join(APP_ROOT, 'data', 'rule-icon.json'),
   deletedRules: path.join(APP_ROOT, 'data', 'deleted-rules.json'),
   intPerms: path.join(APP_ROOT, 'data', 'integration-perms.json'),
+  intLogos: path.join(APP_ROOT, 'data', 'integration-logos.json'),
   appConfig: path.join(APP_ROOT, 'data', 'app-config.json'),
   secretsLock: path.join(APP_ROOT, 'data', 'secrets-lock.json'),
   securityReports: path.join(APP_ROOT, 'data', 'security-reports'),

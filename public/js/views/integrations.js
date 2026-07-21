@@ -2,9 +2,8 @@
 // allow/ask/block toggle that sets the whole connection at once. Open it to
 // fine-tune just three plain buckets: Read, Write, Full access. No managing
 // dozens of individual tool permissions.
-import { el, clear, icon, dialog, confirmDialog, field, input, textarea, toast, emptyState, permToggle } from '../ui.js';
-import { get, put } from '../api.js';
-import { boardState, onBoardChange, updateRow, deleteRow, markDirty, loadBoard, setIntBucket, setIntMaster } from '../boardstore.js';
+import { el, clear, icon, dialog, confirmDialog, field, input, textarea, emptyState, permToggle } from '../ui.js';
+import { boardState, onBoardChange, updateRow, deleteRow, markDirty, loadBoard, setIntBucket, setIntMaster, setIntLogo } from '../boardstore.js';
 import { logoSources, bucketLabel } from '../integration-meta.js';
 
 const PERM_OF = { green: 'allow', yellow: 'ask', red: 'block' };
@@ -17,14 +16,14 @@ const BUCKETS = [
 
 let container = null;
 let unsub = null;
-let clientId = '';
 const open = new Set();
 
 export async function integrationsView(root, actions) {
   container = root;
   await loadBoard();
-  try { clientId = (await get('/api/config')).config?.brandfetchClientId || ''; } catch { clientId = ''; }
-  actions.append(headerActions());
+  // The header actions row (#view-actions) is already a flex row — the Add
+  // button sits to the LEFT of the allow/ask/block legend, inline with spacing.
+  actions.append(addButton(), headerLegend());
   unsub?.();
   unsub = onBoardChange(() => { if (document.contains(container)) render(); });
   render();
@@ -34,10 +33,10 @@ function integrations() {
   return boardState().sections.integrations.rows.filter((r) => !(r.cells[1] || '').startsWith('(pattern)'));
 }
 
-function logoEl(name, size = 38) {
+function logoEl(name, customUrl, size = 38) {
   const wrap = el('span', { class: 'conn-logo', style: `width:${size}px;height:${size}px;` });
   const letter = () => { clear(wrap); wrap.classList.add('is-letter'); wrap.append(el('span', { text: (name || '?').trim()[0].toUpperCase() })); };
-  const sources = logoSources(name, clientId);
+  const sources = logoSources(name, customUrl);
   if (!sources.length) { letter(); return wrap; }
   const img = document.createElement('img');
   img.width = size; img.height = size; img.alt = ''; img.loading = 'lazy';
@@ -60,14 +59,13 @@ function render() {
   container.append(list);
 }
 
-// Header actions: the allow/ask/block legend plus the Add-connection and
-// logo-source controls.
-function headerActions() {
-  return el('div', { class: 'conn-head-actions' },
-    headerLegend(),
-    el('button', { class: 'inline-add', type: 'button', title: 'Add a connection', onclick: addIntegrationDialog }, icon('plus', { size: 14 }), 'Add'),
-    el('button', { class: 'icon-btn', type: 'button', title: 'Logo source', onclick: logoKeyDialog }, icon('stars', { size: 16 })),
-  );
+// The single "Add" button in the header. A new connection's logo URL is set in
+// the Add dialog; existing ones get a "Change logo" control in the open card.
+function addButton() {
+  // Dashed-outline style, same as the Rules "Add rule" button (.inline-add);
+  // .conn-add-btn re-centers it for the header row and adds the trailing gap.
+  return el('button', { class: 'inline-add conn-add-btn', type: 'button', title: 'Add a connection', onclick: addIntegrationDialog },
+    icon('plus', { size: 14 }), 'Add');
 }
 
 // Legend in the header actions area — same tile style as before, no descriptions.
@@ -98,7 +96,7 @@ function connectionCard(row) {
   const master3 = permToggle(master ? PERM_OF[master] : null, (perm) => setIntMaster(row, COLOR_OF_PERM[perm]));
 
   const head = el('div', { class: 'cat-head conn-head-row', onclick: toggle },
-    logoEl(name, 30),
+    logoEl(name, row.logo, 30),
     el('span', { class: 'cat-head-text' },
       el('span', { class: 'cat-name', text: name }),
       el('span', { class: 'cat-desc', text: master ? masterLabel(master) : 'Custom' }),
@@ -111,7 +109,10 @@ function connectionCard(row) {
   if (isOpen) {
     const body = el('div', { class: 'cat-body' });
     for (const b of BUCKETS) body.append(bucketRow(row, b));
-    body.append(el('button', { class: 'inline-add cat-add-body', type: 'button', onclick: () => removeIntegration(row) }, icon('trash', { size: 14 }), `Remove ${name}`));
+    body.append(el('div', { class: 'conn-card-actions' },
+      el('button', { class: 'inline-add', type: 'button', onclick: () => changeLogoDialog(row) }, icon('magic-stick-3', { size: 14 }), row.logo ? 'Change logo' : 'Set logo'),
+      el('button', { class: 'inline-add', type: 'button', onclick: () => removeIntegration(row) }, icon('trash', { size: 14 }), `Remove ${name}`),
+    ));
     card.append(body);
   }
   return card;
@@ -162,29 +163,52 @@ function editBucketDialog(row, b) {  // eslint-disable-line no-unused-vars
 
 function addIntegrationDialog() {
   const nameInput = input({ placeholder: 'e.g. Linear, Airtable, Resend' });
+  const logoInput = input({ placeholder: 'https://…/logo.png  (optional)' });
   dialog({
     title: 'Add a connection', iconName: 'layers',
     body: el('div', { class: 'stack' },
       field('Connection name', nameInput),
-      el('p', { class: 'cm-body-sm muted', text: 'Starts safe: Read allowed, Write asks first, Full access blocked. Logo is pulled automatically.' }),
+      el('p', { class: 'cm-body-sm muted', text: 'Starts safe: Read allowed, Write asks first, Full access blocked.' }),
+      field('Logo URL (optional)', logoInput),
+      el('p', { class: 'cm-body-sm muted', text: 'Paste a direct link to an image (png, webp, svg…) to use as the logo. Leave blank and one is pulled automatically from the connection’s website.' }),
     ),
     actions: [
       { label: 'Cancel', kind: 'ghost' },
       { label: 'Add connection', kind: 'primary', onClick: () => {
         const name = nameInput.value.trim();
         if (!name) throw new Error('Name the connection first');
-        // Build the full row (with its safe-default perms) AND mark it open
-        // BEFORE markDirty() fires the re-render — otherwise the new card paints
-        // collapsed and all-yellow "Custom" for a frame. read allow / write ask
-        // / full block is the promised starting posture.
+        const logo = logoInput.value.trim() || undefined;
+        // Build the full row (with its safe-default perms + optional logo) AND
+        // mark it open BEFORE markDirty() fires the re-render — otherwise the new
+        // card paints collapsed and all-yellow "Custom" for a frame. read allow /
+        // write ask / full block is the promised starting posture.
         boardState().sections.integrations.rows.push({
           id: null,
           cells: ['', name, 'Look things up', 'Create, change, or send', 'Delete and other big actions'],
           perms: { read: 'green', write: 'yellow', full: 'red' },
+          logo,
         });
         open.add('new:' + name);
         markDirty();
       } },
+    ],
+  });
+}
+
+// Set or clear a connection's custom logo — a direct image URL. Blank clears it
+// and the automatic keyless logo takes over. Saved with the next "Save changes".
+function changeLogoDialog(row) {
+  const name = row.cells[1];
+  const logoInput = input({ placeholder: 'https://…/logo.png' }); logoInput.value = row.logo || '';
+  dialog({
+    title: `Logo — ${name}`, iconName: 'magic-stick-3',
+    body: el('div', { class: 'stack' },
+      field('Logo URL', logoInput),
+      el('p', { class: 'cm-body-sm muted', text: 'Paste a direct link to an image (png, webp, svg…). Leave blank to clear it and use the automatic logo from the website.' }),
+    ),
+    actions: [
+      { label: 'Cancel', kind: 'ghost' },
+      { label: 'Save', kind: 'primary', onClick: () => setIntLogo(row, logoInput.value.trim()) },
     ],
   });
 }
@@ -194,24 +218,4 @@ async function removeIntegration(row) {
   if (!ok) return;
   if (row.id == null) { boardState().sections.integrations.rows = boardState().sections.integrations.rows.filter((r) => r !== row); markDirty(); }
   else deleteRow('integrations', row.id);
-}
-
-function logoKeyDialog() {
-  const keyInput = input({ value: clientId, placeholder: 'Brandfetch client ID' });
-  dialog({
-    title: 'Logo source', iconName: 'stars',
-    body: el('div', { class: 'stack' },
-      el('p', { class: 'cm-body-sm', text: 'Logos use the Brandfetch Logo API. Paste a free client ID for the best quality (developers.brandfetch.com). Without one, logos fall back to a keyless source automatically.' }),
-      field('Brandfetch client ID', keyInput),
-    ),
-    actions: [
-      { label: 'Cancel', kind: 'ghost' },
-      { label: 'Save', kind: 'primary', onClick: async () => {
-        clientId = keyInput.value.trim();
-        await put('/api/config', { brandfetchClientId: clientId });
-        toast('Saved', clientId ? 'Using Brandfetch logos.' : 'Using keyless logos.');
-        render();
-      } },
-    ],
-  });
 }
